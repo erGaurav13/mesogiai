@@ -30,7 +30,7 @@ class IssueService {
         issues,
         total,
         page,
-        totalPages: Math.ceil(total / limit)
+        totalPages: Math.ceil(total / limit),
       };
     } catch (error) {
       throw new Error(`Error fetching issues: ${error.message}`);
@@ -52,7 +52,7 @@ class IssueService {
         issues,
         total,
         page,
-        totalPages: Math.ceil(total / limit)
+        totalPages: Math.ceil(total / limit),
       };
     } catch (error) {
       throw new Error(`Error fetching user issues: ${error.message}`);
@@ -98,35 +98,44 @@ class IssueService {
   //   }
   // }
 
-async updateIssue(issueId, updateData, userId) {
-  try {
-    const issue = await IssueModel.findById(issueId);
-    if (!issue) {
-      throw new Error('Issue not found');
+  async updateIssue(issueId, updateData, userId) {
+    try {
+      const issue = await IssueModel.findById(issueId);
+      if (!issue) {
+        throw new Error('Issue not found');
+      }
+
+      // Check authorization
+      if (issue.author.toString() !== userId.toString()) {
+        throw new Error('Unauthorized to update this issue');
+      }
+
+      // Update only allowed fields
+      const allowedUpdates = [
+        'title',
+        'description',
+        'category',
+        'location',
+        'latitude',
+        'longitude',
+        'imageUrl',
+        'status',
+      ];
+      const updates = Object.keys(updateData)
+        .filter((key) => allowedUpdates.includes(key))
+        .reduce((obj, key) => {
+          obj[key] = updateData[key];
+          return obj;
+        }, {});
+
+      Object.assign(issue, updates);
+      await issue.save();
+
+      return issue;
+    } catch (error) {
+      throw new Error(`Error updating issue: ${error.message}`);
     }
-
-    // Check authorization
-    if (issue.author.toString() !== userId.toString()) {
-      throw new Error('Unauthorized to update this issue');
-    }
-
-    // Update only allowed fields
-    const allowedUpdates = ['title', 'description', 'category', 'location', 'latitude', 'longitude', 'imageUrl', 'status'];
-    const updates = Object.keys(updateData)
-      .filter(key => allowedUpdates.includes(key))
-      .reduce((obj, key) => {
-        obj[key] = updateData[key];
-        return obj;
-      }, {});
-
-    Object.assign(issue, updates);
-    await issue.save();
-
-    return issue;
-  } catch (error) {
-    throw new Error(`Error updating issue: ${error.message}`);
   }
-}
 
   // Delete issue
   async deleteIssue(issueId, userId) {
@@ -136,8 +145,12 @@ async updateIssue(issueId, updateData, userId) {
         throw new Error('Issue not found');
       }
 
+      if (issue?.status !== 'Pending') {
+        throw new Error('Only Pending Issue can be deleted');
+      }
+
       // Check if the user is the author or admin
-      if (issue.author.toString() !== userId.toString()) {
+      if (issue.author._id !== userId) {
         throw new Error('Unauthorized to delete this issue');
       }
 
@@ -154,7 +167,7 @@ async updateIssue(issueId, updateData, userId) {
       const issue = await IssueModel.findByIdAndUpdate(
         issueId,
         { $inc: { voteCount: 1 } },
-        { new: true }
+        { new: true },
       );
       if (!issue) {
         throw new Error('Issue not found');
@@ -173,11 +186,7 @@ async updateIssue(issueId, updateData, userId) {
         throw new Error('Invalid status');
       }
 
-      const issue = await IssueModel.findByIdAndUpdate(
-        issueId,
-        { status },
-        { new: true }
-      );
+      const issue = await IssueModel.findByIdAndUpdate(issueId, { status }, { new: true });
       if (!issue) {
         throw new Error('Issue not found');
       }
