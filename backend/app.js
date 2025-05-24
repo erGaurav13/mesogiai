@@ -41,6 +41,7 @@ app.use((req, res, next) => {
 app.use('/api', AllRoutes.IssueRoutes);
 app.use('/api/auth', AllRoutes.authRoutes);
 app.use('/api/vote', AllRoutes.VoteRoutes);
+app.use('/api/analytics', AllRoutes.AnalyticsRoutes);
 
 app.get('/health', (req, res) => {
   const healthStatus = {
