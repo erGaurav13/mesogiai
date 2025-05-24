@@ -1,3 +1,3 @@
 const authController = require('./AuthController/auth.controller');
-
-module.exports = { authController };
+const IssueController = require('./IssueController/IssueController');
+module.exports = { authController,IssueController };

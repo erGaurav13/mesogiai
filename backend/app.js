@@ -5,6 +5,8 @@ const compression = require('compression');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const path = require('path');
+
 const AllRoutes = require('./src/routes/index.routes');
 
 require('dotenv').config();
@@ -25,7 +27,7 @@ app.use(CORS()); // For Cross-Origin Resource Sharing
 app.use(express.urlencoded({ extended: true })); // For handling URL-encoded data
 app.use(express.json({ limit: '10kb' })); // For handling JSON data
 app.use(limiter); // For rate limiting requests
-
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Timeout handler
 app.use((req, res, next) => {
   res.setTimeout(5000, () => {
@@ -36,8 +38,9 @@ app.use((req, res, next) => {
 
 // Routes
 
+app.use('/api', AllRoutes.IssueRoutes);
 app.use('/api/auth', AllRoutes.authRoutes);
-  
+
 app.get('/health', (req, res) => {
   const healthStatus = {
     status: 'ok',
