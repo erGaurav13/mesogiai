@@ -37,6 +37,24 @@ class AuthController {
       res.status(401).json({ error: err.message });
     }
   }
+   async getProfile(req, res) {
+    try {
+      const result = await authService.profile(req);
+      res.status(200).json(result);
+    } catch (err) {
+      res.status(401).json({ error: err.message });
+    }
+  }
+
+  // logout
+   async logout(req, res) {
+    try {
+      const result = await authService.logout(req);
+      res.status(200).json(result);
+    } catch (err) {
+      res.status(401).json({ error: err.message });
+    }
+  }
 }
 
 module.exports = new AuthController();

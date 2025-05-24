@@ -11,8 +11,12 @@ const authMiddleware = async (req, res, next) => {
   try {
     const token = authHeader.split(' ')[1];
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    const user = await UserModel.findOne({ _id: decoded.id, token: token });
+    if (!user) return res.status(401).json({ error: 'token userid mismatched provided' });
+
     req.user = decoded; // contains { id, username }
-    console.log(decoded)
+    console.log(decoded);
     next();
   } catch (err) {
     res.status(401).json({ error: 'Invalid or expired token' });
