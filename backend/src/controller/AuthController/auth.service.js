@@ -46,6 +46,8 @@ class AuthService {
         expiresIn: '1h',
       },
     );
+    user.token = token;
+    await user.save();
 
     return {
       message: 'Login successful',
