@@ -7,8 +7,6 @@ const IssueService = require('./Issue.service');
 const Response = require('../responseHandeler');
 
 class IssueController {
-  
-
   async createIssue(req, res) {
     try {
       const { title, description, category, location, latitude, longitude } = req.body;
@@ -99,90 +97,78 @@ class IssueController {
   }
 
   // Update issue
-  // async updateIssue(req, res) {
-  //   try {
-  //     const issueId = req.params.id;
-  //     const userId = req.user.id;
-  //     const updateData = req.body;
-
-  //     const updatedIssue = await IssueService.updateIssue(issueId, updateData, userId);
-  //     Response.success(res, updatedIssue, 'Issue updated successfully');
-  //   } catch (err) {
-  //     Response.failure(res, err.message, err.message.includes('Unauthorized') ? 403 : 400);
-  //   }
-  // }
 
   async updateIssue(req, res) {
-  try {
-    const issueId = req.params.id;
-    const userId = req.user.id;
-    const { title, description, category, location, latitude, longitude, removeImage } = req.body;
-    
-    // Get the existing issue first
-    const existingIssue = await IssueService.getIssueById(issueId);
-    if (!existingIssue) {
-      throw new Error('Issue not found');
-    }
-console.log(existingIssue,"dd",userId)
-    // Check authorization
-    if (existingIssue.author._id !== userId) {
-      throw new Error('Unauthorized to update this issue');
-    }
+    try {
+      const issueId = req.params.id;
+      const userId = req.user.id;
+      const { title, description, category, location, latitude, longitude, removeImage } = req.body;
 
-    let imageUrl = existingIssue.imageUrl;
-    let oldImagePath = '';
+      // Get the existing issue first
+      const existingIssue = await IssueService.getIssueById(issueId);
+      if (!existingIssue) {
+        throw new Error('Issue not found');
+      }
+      console.log(existingIssue, 'dd', userId);
+      // Check authorization
+      if (existingIssue.author._id !== userId) {
+        throw new Error('Unauthorized to update this issue');
+      }
 
-    // Handle image update/removal
-    if (req.file) {
-      // New image uploaded - prepare to delete old one
-      if (existingIssue.imageUrl) {
+      let imageUrl = existingIssue.imageUrl;
+      let oldImagePath = '';
+
+      // Handle image update/removal
+      if (req.file) {
+        // New image uploaded - prepare to delete old one
+        if (existingIssue.imageUrl) {
+          const filename = existingIssue.imageUrl.split('/').pop();
+          oldImagePath = path.join(__dirname, '../../uploads/issues', filename);
+        }
+
+        // Set new image URL
+        imageUrl = `${req.protocol}://${req.get('host')}/uploads/issues/${req.file.filename}`;
+
+        // Verify new file was saved
+        try {
+          await fs.promises.access(req.file.path);
+        } catch (err) {
+          if (req.file.path) await unlinkAsync(req.file.path).catch(() => {});
+          throw new Error('Failed to save the uploaded image');
+        }
+      } else if (removeImage === 'true' && existingIssue.imageUrl) {
+        // User requested to remove existing image
         const filename = existingIssue.imageUrl.split('/').pop();
         oldImagePath = path.join(__dirname, '../../uploads/issues', filename);
+        imageUrl = '';
       }
-      
-      // Set new image URL
-      imageUrl = `${req.protocol}://${req.get('host')}/uploads/issues/${req.file.filename}`;
-      
-      // Verify new file was saved
-      try {
-        await fs.promises.access(req.file.path);
-      } catch (err) {
-        if (req.file.path) await unlinkAsync(req.file.path).catch(() => {});
-        throw new Error('Failed to save the uploaded image');
+
+      const updateData = {
+        title,
+        description,
+        category,
+        location,
+        latitude: latitude ? parseFloat(latitude) : undefined,
+        longitude: longitude ? parseFloat(longitude) : undefined,
+        imageUrl,
+      };
+
+      const updatedIssue = await IssueService.updateIssue(issueId, updateData, userId);
+
+      // Delete old image if it was replaced or removed
+      if (oldImagePath) {
+        await unlinkAsync(oldImagePath).catch(() => {});
       }
-    } else if (removeImage === 'true' && existingIssue.imageUrl) {
-      // User requested to remove existing image
-      const filename = existingIssue.imageUrl.split('/').pop();
-      oldImagePath = path.join(__dirname, '../../uploads/issues', filename);
-      imageUrl = '';
-    }
 
-    const updateData = {
-      title,
-      description,
-      category,
-      location,
-      latitude: latitude ? parseFloat(latitude) : undefined,
-      longitude: longitude ? parseFloat(longitude) : undefined,
-      imageUrl
-    };
-
-    const updatedIssue = await IssueService.updateIssue(issueId, updateData, userId);
-    
-    // Delete old image if it was replaced or removed
-    if (oldImagePath) {
-      await unlinkAsync(oldImagePath).catch(() => {});
+      Response.success(res, updatedIssue, 'Issue updated successfully');
+    } catch (err) {
+      // Clean up newly uploaded file if error occurred
+      if (req.file?.path) {
+        await unlinkAsync(req.file.path).catch(() => {});
+      }
+      Response.failure(res, err.message, err.message.includes('Unauthorized') ? 403 : 400);
     }
-
-    Response.success(res, updatedIssue, 'Issue updated successfully');
-  } catch (err) {
-    // Clean up newly uploaded file if error occurred
-    if (req.file?.path) {
-      await unlinkAsync(req.file.path).catch(() => {});
-    }
-    Response.failure(res, err.message, err.message.includes('Unauthorized') ? 403 : 400);
   }
-}
 
   // Delete issue
   async deleteIssue(req, res) {

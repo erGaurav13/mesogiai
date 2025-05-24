@@ -17,5 +17,6 @@ router.put('/issues/:id', auth,UploadImage.single('image'), (req, res) => IssueC
 router.get('/issues/:id', (req, res) => IssueController.getIssueById(req, res));
 
 router.delete('/issues/:id', auth, (req, res) => IssueController.deleteIssue(req, res));
+router.patch('/issues/:id/status', (req, res) => IssueController.changeIssueStatus(req, res));
 
 module.exports = router;
