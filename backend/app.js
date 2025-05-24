@@ -11,7 +11,7 @@ const AllRoutes = require('./src/routes/index.routes');
 
 require('dotenv').config();
 
-const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100 });
+const limiter = rateLimit({ windowMs: 1 * 60 * 1000, max: 1000 });
 
 // Logging requests
 if (process.env.NODE_ENV === 'development') {
