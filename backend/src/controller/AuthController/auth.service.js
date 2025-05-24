@@ -3,22 +3,18 @@ const jwt = require('jsonwebtoken');
 const { UserModel } = require('../../model/index.model');
 
 class AuthService {
-  async signup({ username, email, password, displayName, bio, avatarUrl,_id }) {
-    const existingUser = await UserModel.findOne({ $or: [{ email }, { username }] });
+  async signup({  email, password,_id }) {
+    const existingUser = await UserModel.findOne({email:email });
     if (existingUser) {
-      throw new Error('User with this email or username already exists');
+      throw new Error('User with this email  already exists');
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-
     const newUser = await UserModel.create({
         _id,
-      username,
       email,
       password: hashedPassword,
-      displayName,
-      bio,
-      avatarUrl,
+     
     });
 
     return {
@@ -39,7 +35,7 @@ class AuthService {
       throw new Error('Invalid credentials');
     }
 
-    const token = jwt.sign({ id: user._id, username: user.username }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET, {
       expiresIn: '1h',
     });
 
@@ -48,9 +44,7 @@ class AuthService {
       token,
       user: {
         id: user._id,
-        username: user.username,
-        displayName: user.displayName,
-        avatarUrl: user.avatarUrl,
+        email: user.email,
       },
     };
   }

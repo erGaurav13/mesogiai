@@ -36,7 +36,7 @@ app.use((req, res, next) => {
 
 // Routes
 
-app.use('/auth', AllRoutes.authRoutes);
+app.use('/api/auth', AllRoutes.authRoutes);
   
 app.get('/health', (req, res) => {
   const healthStatus = {
