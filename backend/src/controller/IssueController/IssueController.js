@@ -57,10 +57,11 @@ class IssueController {
   // Get paginated/filtered issues
   async getIssues(req, res) {
     try {
-      const { page = 1, limit = 10, status, category } = req.query;
+      const { page = 1, limit = 10, status, category, sort = -1 } = req.query;
       const result = await IssueService.getIssues({
         page: parseInt(page),
         limit: parseInt(limit),
+        sort: parseInt(sort),
         status,
         category,
       });
@@ -74,10 +75,11 @@ class IssueController {
   async getUserIssues(req, res) {
     try {
       const userId = req.user._id;
-      const { page = 1, limit = 10 } = req.query;
+      const { page = 1, limit = 10 ,sort=-1} = req.query;
       const result = await IssueService.getUserIssues(userId, {
         page: parseInt(page),
         limit: parseInt(limit),
+        sort: parseInt(sort),
       });
       Response.success(res, result, 'User issues fetched successfully');
     } catch (err) {

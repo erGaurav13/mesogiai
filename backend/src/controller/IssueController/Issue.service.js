@@ -12,7 +12,7 @@ class IssueService {
   }
 
   // Get paginated/filtered issues
-  async getIssues({ page = 1, limit = 10, status, category }) {
+  async getIssues({ page = 1, limit = 10, status, category, sort }) {
     try {
       const query = {};
       if (status) query.status = status;
@@ -22,7 +22,7 @@ class IssueService {
         .populate('author', 'username email')
         .skip((page - 1) * limit)
         .limit(limit)
-        .sort({ createdAt: -1 });
+        .sort({ createdAt: sort });
 
       const total = await IssueModel.countDocuments(query);
 
@@ -38,13 +38,13 @@ class IssueService {
   }
 
   // Get user's issues
-  async getUserIssues(userId, { page = 1, limit = 10 }) {
+  async getUserIssues(userId, { page = 1, limit = 10 ,sort }) {
     try {
       const issues = await IssueModel.find({ author: userId })
         .populate('author', 'email')
         .skip((page - 1) * limit)
         .limit(limit)
-        .sort({ createdAt: -1 });
+        .sort({ createdAt: sort });
 
       const total = await IssueModel.countDocuments({ author: userId });
 
