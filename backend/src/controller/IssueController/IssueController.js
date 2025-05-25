@@ -74,7 +74,7 @@ class IssueController {
   // Get user's issues
   async getUserIssues(req, res) {
     try {
-      const userId = req.user._id;
+      const userId = req.user.id;
       const { page = 1, limit = 10 ,sort=-1} = req.query;
       const result = await IssueService.getUserIssues(userId, {
         page: parseInt(page),
