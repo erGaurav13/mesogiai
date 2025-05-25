@@ -12,12 +12,14 @@ class IssueService {
   }
 
   // Get paginated/filtered issues
-  async getIssues({ page = 1, limit = 10, status, category, sort }) {
+  async getIssues({ page = 1, limit = 10, status, category, sort, search }) {
     try {
       const query = {};
       if (status) query.status = status;
       if (category) query.category = category;
-
+      if (search) {
+        query.title = { $regex: search, $options: 'i' }; // case-insensitive regex search
+      }
       const issues = await IssueModel.find(query)
         .populate('author', 'username email')
         .skip((page - 1) * limit)
@@ -38,7 +40,7 @@ class IssueService {
   }
 
   // Get user's issues
-  async getUserIssues(userId, { page = 1, limit = 10 ,sort }) {
+  async getUserIssues(userId, { page = 1, limit = 10, sort }) {
     try {
       const issues = await IssueModel.find({ author: userId })
         .populate('author', 'email')
@@ -141,7 +143,7 @@ class IssueService {
   async deleteIssue(issueId, userId) {
     try {
       const issue = await IssueModel.findById(issueId).populate('author');
-       console.log(issue,"user",userId)
+      console.log(issue, 'user', userId);
       if (!issue) {
         throw new Error('Issue not found');
       }
@@ -154,8 +156,6 @@ class IssueService {
       if (issue.author._id !== userId) {
         throw new Error('Unauthorized to delete this issue');
       }
-
-     
 
       await IssueModel.findByIdAndDelete(issueId);
       return { message: 'Issue deleted successfully' };
