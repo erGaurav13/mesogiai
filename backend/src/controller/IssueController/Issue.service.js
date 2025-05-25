@@ -140,7 +140,8 @@ class IssueService {
   // Delete issue
   async deleteIssue(issueId, userId) {
     try {
-      const issue = await IssueModel.findById(issueId);
+      const issue = await IssueModel.findById(issueId).populate('author');
+       console.log(issue,"user",userId)
       if (!issue) {
         throw new Error('Issue not found');
       }
@@ -154,7 +155,7 @@ class IssueService {
         throw new Error('Unauthorized to delete this issue');
       }
 
-      console.log(issue,"user",userId)
+     
 
       await IssueModel.findByIdAndDelete(issueId);
       return { message: 'Issue deleted successfully' };
