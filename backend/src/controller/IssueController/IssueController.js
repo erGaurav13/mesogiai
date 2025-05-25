@@ -176,7 +176,7 @@ class IssueController {
   async deleteIssue(req, res) {
     try {
       const issueId = req.params.id;
-      const userId = req.user._id;
+      const userId = req.user.id;
 
       const result = await IssueService.deleteIssue(issueId, userId);
       Response.success(res, result, 'Issue deleted successfully');

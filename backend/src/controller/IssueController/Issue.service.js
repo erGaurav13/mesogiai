@@ -154,6 +154,8 @@ class IssueService {
         throw new Error('Unauthorized to delete this issue');
       }
 
+      console.log(issue,"user",userId)
+
       await IssueModel.findByIdAndDelete(issueId);
       return { message: 'Issue deleted successfully' };
     } catch (error) {
