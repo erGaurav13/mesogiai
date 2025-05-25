@@ -23,9 +23,11 @@ if (process.env.NODE_ENV === 'development') {
 // Middleware
 app.use(helmet()); // For securing HTTP headers
 app.use(compression()); // To compress the response body
-app.use(Cors({
-  origin: 'http://localhost:5173', // allow your frontend
-  credentials: true                // if using cookies or auth headers
+// ✅ Allow all origins (temporary for development)
+app.use(CORS({
+  origin: '*', // or use a list of allowed origins for production
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
  // For Cross-Origin Resource Sharing
 app.use(express.urlencoded({ extended: true })); // For handling URL-encoded data
