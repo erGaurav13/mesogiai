@@ -25,9 +25,10 @@ app.use(helmet()); // For securing HTTP headers
 app.use(compression()); // To compress the response body
 // ✅ Allow all origins (temporary for development)
 app.use(CORS({
-  origin: '*', // or use a list of allowed origins for production
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  origin: 'http://localhost:5173',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
 }));
  // For Cross-Origin Resource Sharing
 app.use(express.urlencoded({ extended: true })); // For handling URL-encoded data
