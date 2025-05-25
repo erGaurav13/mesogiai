@@ -23,7 +23,11 @@ if (process.env.NODE_ENV === 'development') {
 // Middleware
 app.use(helmet()); // For securing HTTP headers
 app.use(compression()); // To compress the response body
-app.use(CORS()); // For Cross-Origin Resource Sharing
+app.use(Cors({
+  origin: 'http://localhost:5173', // allow your frontend
+  credentials: true                // if using cookies or auth headers
+}));
+ // For Cross-Origin Resource Sharing
 app.use(express.urlencoded({ extended: true })); // For handling URL-encoded data
 app.use(express.json({ limit: '10kb' })); // For handling JSON data
 app.use(limiter); // For rate limiting requests
