@@ -25,7 +25,7 @@ app.use(helmet()); // For securing HTTP headers
 app.use(compression()); // To compress the response body
 // ✅ Allow all origins (temporary for development)
 app.use(CORS({
-  origin: '*',
+  origin: ['http://localhost:5173',"https://dashing-snickerdoodle-1fa68e.netlify.app"],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
